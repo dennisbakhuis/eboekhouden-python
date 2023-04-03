@@ -1,8 +1,8 @@
 """Mutatie types used by E-boekhouden.nl."""
-from enum import Enum
+from .string_enum import StringEnum
 
 
-class MutatieSoort(Enum):
+class MutatieSoort(StringEnum):
     """Mutatie types used by E-boekhouden.nl."""
 
     factuur_ontvangen = "FactuurOntvangen"  # Factuur ontvangen

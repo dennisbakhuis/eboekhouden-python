@@ -40,3 +40,24 @@ class Mutatie:
             InExBTW=self.inclusief_exclusief_btw,
             MutatieRegels=dict(cMutatieRegel=[x.export() for x in self.mutatie_regels]),
         )
+
+    def to_string(self):
+        """Return a string representation of this object."""
+        regels = "----------------------\n".join([x.to_string() for x in self.mutatie_regels])
+        return (
+            "Mutatie:\n"
+            "--------\n"
+            f"Mutatienummer        : {self.mutatie_nummer}\n"
+            f"Soort                : {self.soort}\n"
+            f"Rekening             : {self.rekening}\n"
+            f"RelatieCode          : {self.relatie_code}\n"
+            f"Factuurnummer        : {self.factuur_nummer}\n"
+            f"Omschrijving         : {self.omschrijving}\n"
+            f"Betalingstermijn     : {self.betalingstermijn}\n"
+            f"Inclusief/exclusief  : {self.inclusief_exclusief_btw}\n"
+            f"Boekstuk             : {self.boekstuk}\n"
+            f"Betalingskenmerk     : {self.betalingskenmerk}\n"
+            f"Mutatieregels        : {len(self.mutatie_regels)}\n"
+            "----------------------\n"
+            f"{regels}"
+        )

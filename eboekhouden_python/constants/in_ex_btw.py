@@ -1,8 +1,8 @@
 """Including or excluding BTW type used by E-boekhouden.nl."""
-from enum import Enum
+from .string_enum import StringEnum
 
 
-class InExBTW(Enum):
+class InExBTW(StringEnum):
     """Including or excluding BTW type used by E-boekhouden.nl."""
 
     inclusief = "IN"  # Inclusief BTW

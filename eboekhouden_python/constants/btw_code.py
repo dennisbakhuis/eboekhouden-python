@@ -1,8 +1,8 @@
 """Btw codes used by E-boekhouden.nl."""
-from enum import Enum
+from .string_enum import StringEnum
 
 
-class BtwCode(Enum):
+class BtwCode(StringEnum):
     """Btw codes used by E-boekhouden.nl."""
 
     hoog_verkoop_19 = "HOOG_VERK"  # BTW hoog, verkopen 19%
@@ -26,3 +26,20 @@ class BtwCode(Enum):
     buiten_eu_inkopen_0 = "BU_EU_INK"  # Leveringen/diensten van buiten de EU 0%
     binnen_eu_inkopen_0 = "BI_EU_INK"  # Leveringen/diensten van binnen de EU 0%
     geen = "GEEN"  # Geen BTW
+
+
+btw_codes_hoog = [
+    BtwCode.hoog_verkoop_19,
+    BtwCode.hoog_verkoop_21,
+    BtwCode.hoog_inkopen,
+    BtwCode.hoog_inkopen_21,
+    BtwCode.verlegd_inkopen_21,
+]
+btw_codes_laag = [
+    BtwCode.laag_verkoop,
+    BtwCode.laag_verkoop_9,
+    BtwCode.verlegd_verkoop_9,
+    BtwCode.laag_inkopen,
+    BtwCode.laag_inkopen_9,
+]
+btw_codes_geen = [x for x in BtwCode if x not in btw_codes_hoog + btw_codes_laag]
