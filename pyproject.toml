@@ -2,19 +2,22 @@
 name = "eboekhouden-python"
 version = "0.1.0"
 description = ""
-authors = ["Dennis Bakhuis <git@bakhuis.nu>"]
+authors = ["Dennis Bakhuis <pypi@bakhuis.nu>"]
 readme = "README.md"
 packages = [{include = "eboekhouden_python"}]
+license = "MIT"
 
 [tool.poetry.dependencies]
 python = "^3.11"
 zeep = "^4.2.1"
 
-
 [tool.poetry.group.dev.dependencies]
 jupyterlab = "^3.6.3"
 pre-commit = "^3.2.1"
 pytest = "^7.2.2"
+jupyter = "^1.0.0"
+pytest-cov = "^4.0.0"
+coverage = "^7.2.2"
 
 [tool.ruff]
 line-length = 100
@@ -22,3 +25,6 @@ line-length = 100
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.pydocstyle]
+convention = "numpy"

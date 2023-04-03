@@ -26,7 +26,7 @@ class EboekhoudenClient:
         if self._username is None or self._code1 is None or self._code2 is None:
             raise ValueError("Incomplete Eboekhouden credentials")
 
-        if self._server_url is None:
+        if self._server_url is None or self._server_url == "":
             raise ValueError("Server URL Eboekhouden missing")
 
         self._client = ZeepClient(self._server_url)
@@ -38,15 +38,14 @@ class EboekhoudenClient:
         if "ErrorMsg" not in response:
             raise ValueError("Unexpected response, do you have the correct server URL?")
 
-        if response.ErrorMsg is not None:
-            if "LastErrorCode" in response.ErrorMsg:
-                if response.ErrorMsg["LastErrorCode"] is not None:
+        if response["ErrorMsg"] is not None:
+            if "LastErrorCode" in response["ErrorMsg"]:
+                if response["ErrorMsg"]["LastErrorCode"] is not None:
                     print(response["ErrorMsg"])
                     raise ValueError(
                         "Error interfacing with Eboekhouden, correct credentials?",
                     )
             else:
-                print(type(response.ErrorMsg))
                 if response["ErrorMsg"] is not None:
                     print(response["ErrorMsg"])
                     raise ValueError(
@@ -62,7 +61,7 @@ class EboekhoudenClient:
         )
         self._check_response(response)
 
-        self._session_id = response.SessionID
+        self._session_id = response["SessionID"]
 
     def get_mutaties(
         self,
@@ -93,10 +92,10 @@ class EboekhoudenClient:
 
         self._check_response(mutaties)
 
-        if mutaties.Mutaties is None:
+        if mutaties["Mutaties"] is None:
             return []
 
-        return mutaties.Mutaties.cMutatieList
+        return mutaties["Mutaties"]["cMutatieList"]
 
     def add_mutatie(self, mutatie: Mutatie) -> str:
         """Add mutatie."""
@@ -105,12 +104,12 @@ class EboekhoudenClient:
         response = self._client.service.AddMutatie(
             SessionID=self._session_id,
             SecurityCode2=self._code2,
-            oMut=mutatie,
+            oMut=mutatie.export(),
         )
 
         self._check_response(response)
 
-        if response.MutatieNr is None:
+        if response["MutatieNr"] is None:
             raise ValueError("Error adding mutatie")
 
-        return response.MutatieNr
+        return response["MutatieNr"]

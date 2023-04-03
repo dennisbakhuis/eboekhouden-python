@@ -5,6 +5,6 @@ install-pre-commit: ## Install pre-commit hooks
 	pre-commit install
 
 test: ## Run pytest and report coverage
-	pytest --cov-report term-missing --cov=idc
+	pytest --cov-report term-missing --cov=eboekhouden_python
 
 .PHONY: help init test

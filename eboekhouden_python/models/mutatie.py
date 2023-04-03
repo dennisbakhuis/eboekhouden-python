@@ -20,14 +20,14 @@ class Mutatie:
     betalingstermijn: str  # String in days, e.g. 14
     inclusief_exclusief_btw: str  # String
     mutatie_regels: list[MutatieRegel]  # List of MutatieRegel
-    mutatie_nr: Optional[str] = None  # str=99999
+    mutatie_nummer: Optional[str] = None  # str=99999
     boekstuk: Optional[str] = None  # String
     betalingskenmerk: Optional[str] = None  # String
 
     def export(self):
         """Export to structure used in SOAP of E-Boekhouden.nl."""
         return dict(
-            MutatieNr=self.mutatie_nr or ZeepXsdSkipValue,
+            MutatieNr=self.mutatie_nummer or ZeepXsdSkipValue,
             Soort=self.soort,
             Datum=self.datum,
             Rekening=self.rekening,
