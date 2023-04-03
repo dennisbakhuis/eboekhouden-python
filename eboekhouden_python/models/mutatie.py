@@ -62,7 +62,3 @@ class Mutatie:
             "----------------------\n"
             f"{regels}"
         )
-
-    def __repr__(self) -> str:  # pragma: no cover
-        """Return a string representation of this object."""
-        return f"Mutatie: {self.datum} -> {self.soort} -> {self.rekening}"

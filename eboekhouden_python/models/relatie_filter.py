@@ -24,7 +24,3 @@ class RelatieFilter:
             Code=self.code or ZeepXsdSkipValue,
             ID=self.id or ZeepXsdSkipValue,
         )
-
-    def __repr__(self) -> str:
-        """Return a string representation of this object."""
-        return f"RelatieFilter: {self.trefwoord} / {self.code} -> {self.id}"

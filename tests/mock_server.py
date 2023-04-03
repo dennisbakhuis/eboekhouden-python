@@ -140,11 +140,11 @@ class MockServices:
         if oMut["MutatieNr"] != "test":
             return {
                 "ErrorMsg": None,
-                "MutatieNr": None,
+                "Mutatienummer": None,
             }
         return {
             "ErrorMsg": None,
-            "MutatieNr": oMut["MutatieNr"],
+            "Mutatienummer": oMut["MutatieNr"],
         }
 
     def AddRelatie(self, SessionID, SecurityCode2, oRel):

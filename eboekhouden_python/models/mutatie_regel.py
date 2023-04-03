@@ -45,7 +45,7 @@ class MutatieRegel:
             bedrag_exclusief_btw=f"{bedrag_exclusief_btw:.2f}",
             bedrag_btw=f"{bedrag_btw:.2f}",
             bedrag_inclusief_btw=f"{bedrag_invoer:.2f}",
-            btw_code=btw_code,
+            btw_code=str(btw_code),
             btw_percentage=str(btw_percentage),
             tegenrekening_code=tegenrekening_code,
         )
@@ -77,7 +77,3 @@ class MutatieRegel:
             f"Tegenrekening        : {self.tegenrekening_code}\n"
             f"Kostenplaats ID      : {self.kostenplaats_id}\n"
         )
-
-    def __repr__(self) -> str:  # pragma: no cover
-        """Return a string representation of this object."""
-        return f"- Regel: {self.bedrag_invoer} / {self.btw_code} -> {self.tegenrekening_code}"

@@ -15,7 +15,6 @@ def test_relatie_filter_partially_filled():
         "Code": "1",
         "ID": 1,
     }
-    assert repr(relatie_filter) == "RelatieFilter: 1 / 1 -> 1"
 
 
 def test_relatie_filter_fully_filled():
@@ -30,4 +29,3 @@ def test_relatie_filter_fully_filled():
         "Code": "1",
         "ID": 1,
     }
-    assert repr(relatie_filter) == "RelatieFilter: 1 / 1 -> 1"

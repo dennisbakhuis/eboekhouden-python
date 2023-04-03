@@ -54,7 +54,14 @@ def test_eboekhouden_client_check_response(client):
 
     # Test other service typical error responses
     with pytest.raises(ValueError):
-        client._check_response({"ErrorMsg": {"LastErrorCode": "some error"}})  # fake
+        client._check_response(
+            {
+                "ErrorMsg": {
+                    "LastErrorCode": "some error",
+                    "LastErrorDescription": "some description",
+                }
+            }
+        )  # fake
 
 
 def test_eboekhouden_client_get_session_id(client):

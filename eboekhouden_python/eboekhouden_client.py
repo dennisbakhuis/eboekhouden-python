@@ -46,15 +46,16 @@ class EboekhoudenClient:
         if response["ErrorMsg"] is not None:
             if "LastErrorCode" in response["ErrorMsg"]:
                 if response["ErrorMsg"]["LastErrorCode"] is not None:
-                    print(response["ErrorMsg"])
+                    error_code = response["ErrorMsg"]["LastErrorCode"]
+                    description = response["ErrorMsg"]["LastErrorDescription"]
                     raise ValueError(
-                        "Error interfacing with Eboekhouden, correct credentials?",
+                        f"{error_code}: {description}",
                     )
             else:
                 if response["ErrorMsg"] is not None:
                     print(response["ErrorMsg"])
                     raise ValueError(
-                        "Error interfacing with Eboekhouden, correct credentials?",
+                        f"Error: {response['ErrorMsg']}",
                     )
 
     def get_session_id(self):
@@ -106,18 +107,20 @@ class EboekhoudenClient:
         """Add mutatie."""
         self.get_session_id()
 
+        exported_mutatie = mutatie.export()
+
         response = self._client.service.AddMutatie(
             SessionID=self._session_id,
             SecurityCode2=self._code2,
-            oMut=mutatie.export(),
+            oMut=exported_mutatie,
         )
 
         self._check_response(response)
 
-        if response["MutatieNr"] is None:
+        if response["Mutatienummer"] is None:
             raise ValueError("Error adding mutatie")
 
-        return response["MutatieNr"]
+        return response["Mutatienummer"]
 
     def get_relaties(
         self,
