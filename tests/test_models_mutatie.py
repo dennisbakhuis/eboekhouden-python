@@ -147,6 +147,7 @@ def test_mutatie_to_string():
 --------
 Mutatienummer        : 1
 Soort                : 1
+Datum                : 2020-01-01
 Rekening             : 1
 RelatieCode          : 1
 Factuurnummer        : 1

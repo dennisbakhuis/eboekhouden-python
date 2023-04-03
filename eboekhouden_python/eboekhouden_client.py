@@ -4,7 +4,12 @@ import os
 
 from zeep import Client as ZeepClient
 
-from .models import MutatieFilter, Mutatie
+from .models import (
+    MutatieFilter,
+    Mutatie,
+    RelatieFilter,
+    Relatie,
+)
 
 
 class EboekhoudenClient:
@@ -113,3 +118,48 @@ class EboekhoudenClient:
             raise ValueError("Error adding mutatie")
 
         return response["MutatieNr"]
+
+    def get_relaties(
+        self,
+        trefwoord: Optional[str] = None,
+        relatie_code: Optional[str] = None,
+        id: Optional[int] = None,
+    ) -> list[dict]:
+        """
+        Get relaties.
+
+        Results are capped to maximum of 100 records.
+        """
+        relatie_filter = RelatieFilter(trefwoord=trefwoord, code=relatie_code, id=id)
+
+        self.get_session_id()
+
+        relaties = self._client.service.GetRelaties(
+            SessionID=self._session_id,
+            SecurityCode2=self._code2,
+            cFilter=relatie_filter.export(),
+        )
+
+        self._check_response(relaties)
+
+        if relaties["Relaties"] is None:
+            return []
+
+        return relaties["Relaties"]["cRelatie"]
+
+    def add_relatie(self, relatie: Relatie) -> str:
+        """Add mutatie."""
+        self.get_session_id()
+
+        response = self._client.service.AddRelatie(
+            SessionID=self._session_id,
+            SecurityCode2=self._code2,
+            oRel=relatie.export(),
+        )
+
+        self._check_response(response)
+
+        if response["Rel_ID"] is None:
+            raise ValueError("Error adding mutatie")
+
+        return response["Rel_ID"]

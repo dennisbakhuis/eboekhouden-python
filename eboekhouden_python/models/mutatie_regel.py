@@ -80,4 +80,4 @@ class MutatieRegel:
 
     def __repr__(self) -> str:  # pragma: no cover
         """Return a string representation of this object."""
-        self.to_string()
+        return f"- Regel: {self.bedrag_invoer} / {self.btw_code} -> {self.tegenrekening_code}"

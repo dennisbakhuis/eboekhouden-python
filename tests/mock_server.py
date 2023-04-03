@@ -112,6 +112,29 @@ class MockServices:
             },
         }
 
+    def GetRelaties(self, SessionID, SecurityCode2, cFilter):
+        """Get fake relaties."""
+        if cFilter["Code"] == "test":
+            return {
+                "ErrorMsg": None,
+                "Relaties": None,
+            }
+        return {
+            "ErrorMsg": None,
+            "Relaties": {
+                "cRelatie": [
+                    {
+                        "Code": "36",
+                        "Bedrijf": "Test",
+                        "BP": "P",
+                        "Adres": "1234AB",
+                        "Postcode": "Test",
+                        "Land": "NL",
+                    }
+                ]
+            },
+        }
+
     def AddMutatie(self, SessionID, SecurityCode2, oMut):
         """Add a fake mutatie."""
         if oMut["MutatieNr"] != "test":
@@ -122,6 +145,18 @@ class MockServices:
         return {
             "ErrorMsg": None,
             "MutatieNr": oMut["MutatieNr"],
+        }
+
+    def AddRelatie(self, SessionID, SecurityCode2, oRel):
+        """Add a fake mutatie."""
+        if oRel["Code"] != "test":
+            return {
+                "ErrorMsg": None,
+                "Rel_ID": None,
+            }
+        return {
+            "ErrorMsg": None,
+            "Rel_ID": oRel["Code"],
         }
 
 

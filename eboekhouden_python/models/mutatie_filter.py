@@ -26,3 +26,11 @@ class MutatieFilter:
             DatumVan=self.datum_van or ZeepXsdSkipValue,
             DatumTm=self.datum_totmet or ZeepXsdSkipValue,
         )
+
+    def __repr__(self) -> str:  # pragma: no cover
+        """Return a string representation of this object."""
+        return (
+            f"MutatieFilter: {self.mutatie_nummer} -> "
+            f"{self.mutatie_nummer_van} / {self.mutatie_nummer_totmet}"
+            f" {self.factuur_nummer} -> {self.datum_van} / {self.datum_totmet}"
+        )

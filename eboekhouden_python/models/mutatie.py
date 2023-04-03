@@ -49,6 +49,7 @@ class Mutatie:
             "--------\n"
             f"Mutatienummer        : {self.mutatie_nummer}\n"
             f"Soort                : {self.soort}\n"
+            f"Datum                : {self.datum}\n"
             f"Rekening             : {self.rekening}\n"
             f"RelatieCode          : {self.relatie_code}\n"
             f"Factuurnummer        : {self.factuur_nummer}\n"
@@ -64,4 +65,4 @@ class Mutatie:
 
     def __repr__(self) -> str:  # pragma: no cover
         """Return a string representation of this object."""
-        self.to_string()
+        return f"Mutatie: {self.datum} -> {self.soort} -> {self.rekening}"
