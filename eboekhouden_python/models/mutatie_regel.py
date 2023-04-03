@@ -77,3 +77,7 @@ class MutatieRegel:
             f"Tegenrekening        : {self.tegenrekening_code}\n"
             f"Kostenplaats ID      : {self.kostenplaats_id}\n"
         )
+
+    def __repr__(self) -> str:  # pragma: no cover
+        """Return a string representation of this object."""
+        self.to_string()
