@@ -25,4 +25,4 @@ class BtwCode(Enum):
     afwijkend_verkoop = "AFW_VERK"  # Afwijkend btw-tarief verkoop
     buiten_eu_inkopen_0 = "BU_EU_INK"  # Leveringen/diensten van buiten de EU 0%
     binnen_eu_inkopen_0 = "BI_EU_INK"  # Leveringen/diensten van binnen de EU 0%
-    GEEN = "GEEN"  # Geen BTW
+    geen = "GEEN"  # Geen BTW
