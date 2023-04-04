@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "eboekhouden-python"
-version = "0.1.4"
+version = "0.1.5"
 description = "This is a simple API client for the E-boekhouden.nl API. It is written in Python and uses the ZEEP library."
 authors = ["Dennis Bakhuis <pypi@bakhuis.nu>"]
 readme = "README.md"
@@ -21,9 +21,13 @@ pytest = "^7.2.2"
 jupyter = "^1.0.0"
 pytest-cov = "^4.0.0"
 coverage = "^7.2.2"
+tomli = "^2.0.1"
 
 [tool.ruff]
 line-length = 100
+exclude = [
+    ".ipynb",
+]
 
 [build-system]
 requires = ["poetry-core"]

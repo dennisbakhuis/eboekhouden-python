@@ -100,3 +100,7 @@ class Relatie:
                 LedenAdministratie=self.leden_administratie or ZeepXsdSkipValue,
             )
         return export_dict
+
+    def to_string(self):
+        """Return string representation of this object."""
+        return f"Relatie(relatie_code={self.relatie_code}, bedrijf_particulier={self.bedrijf_particulier}, bedrijf={self.bedrijf})"

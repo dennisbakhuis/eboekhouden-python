@@ -143,30 +143,13 @@ def test_mutatie_to_string():
     print(f"\n\n{mutatie.to_string()}\n\n")
     assert (
         mutatie.to_string()
-        == """Mutatie:
---------
-Mutatienummer        : 1
-Soort                : 1
-Datum                : 2020-01-01
-Rekening             : 1
-RelatieCode          : 1
-Factuurnummer        : 1
-Omschrijving         : 1
-Betalingstermijn     : 1
-Inclusief/exclusief  : 1
-Boekstuk             : 1
-Betalingskenmerk     : 1
-Mutatieregels        : 1
-----------------------
-Mutatieregel:
--------------
-BedragInvoer         : 1.0
-Bedrag Exclusief BTW : 1.0
-Bedrag BTW           : 1.0
-Bedrag met BTW       : 1.0
-Btw code             : 1
-Btw percentage       : 1.0
-Tegenrekening        : 1
-Kostenplaats ID      : 1
-"""
+        == """Mutatie(
+  1,
+  2020-01-01,
+  1,
+  1,
+  [
+    Mutatieregel(1.0, 1.0%, 1)
+  ],
+)"""
     )

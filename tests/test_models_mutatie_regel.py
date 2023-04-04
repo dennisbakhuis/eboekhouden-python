@@ -121,17 +121,4 @@ def test_mutatie_to_string():
         btw_percentage="21",
         tegenrekening_code="1",
     )
-    assert (
-        mutatie_regel.to_string()
-        == """Mutatieregel:
--------------
-BedragInvoer         : 1.21
-Bedrag Exclusief BTW : 1.0
-Bedrag BTW           : 0.21
-Bedrag met BTW       : 1.21
-Btw code             : 1
-Btw percentage       : 21
-Tegenrekening        : 1
-Kostenplaats ID      : None
-"""
-    )
+    assert mutatie_regel.to_string() == "Mutatieregel(1.21, 21%, 1)"

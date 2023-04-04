@@ -1,5 +1,3 @@
-from zeep.xsd import SkipValue as ZeepXsdSkipValue
-
 from eboekhouden_python.models import RelatieFilter
 
 

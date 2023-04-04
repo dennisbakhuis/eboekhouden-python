@@ -66,14 +66,5 @@ class MutatieRegel:
     def to_string(self):
         """Return a string representation of this object."""
         return (
-            "Mutatieregel:\n"
-            "-------------\n"
-            f"BedragInvoer         : {self.bedrag_invoer}\n"
-            f"Bedrag Exclusief BTW : {self.bedrag_exclusief_btw}\n"
-            f"Bedrag BTW           : {self.bedrag_btw}\n"
-            f"Bedrag met BTW       : {self.bedrag_inclusief_btw}\n"
-            f"Btw code             : {self.btw_code}\n"
-            f"Btw percentage       : {self.btw_percentage}\n"
-            f"Tegenrekening        : {self.tegenrekening_code}\n"
-            f"Kostenplaats ID      : {self.kostenplaats_id}\n"
+            f"Mutatieregel({self.bedrag_invoer}, {self.btw_percentage}%, {self.tegenrekening_code})"
         )
