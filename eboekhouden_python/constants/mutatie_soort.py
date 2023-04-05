@@ -10,5 +10,5 @@ class MutatieSoort(StringEnum):
     factuurbetaling_ontvangen = "FactuurbetalingOntvangen"  # Factuurbetaling ontvangen
     factuurbetaling_verstuurd = "FactuurbetalingVerstuurd"  # Factuurbetaling verstuurd
     geld_ontvangen = "GeldOntvangen"  # Geld ontvangen
-    geld_uitgeven = "GeldUitgegeven"  # Geld uitgegeven
+    geld_uitgegeven = "GeldUitgegeven"  # Geld uitgegeven
     memoriaal = "Memoriaal"  # Memoriaal

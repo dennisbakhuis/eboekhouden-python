@@ -112,3 +112,19 @@ def test_relatie_partially_filled_additional_fields():
         Def10="1",
         LedenAdministratie="1",
     )
+
+
+def test_relatie_to_string():
+    """Test to_string."""
+    relatie = Relatie(
+        relatie_code="1",
+        bedrijf_particulier=BedrijfParticulier.particulier,
+        bedrijf="1",
+        adres="1",
+        postcode="1",
+        plaats="1",
+        land="1",
+    )
+
+    print(f"\n\n{relatie.to_string()}\n\n")
+    assert relatie.to_string() == "Relatie(relatie_code=1, bedrijf_particulier=P, bedrijf=1)"
