@@ -6,11 +6,11 @@ from .bedrijf_particulier import BedrijfParticulier
 
 
 __all__ = [
-    BedrijfParticulier,
-    BtwCode,
-    btw_codes_hoog,
-    btw_codes_laag,
-    btw_codes_geen,
-    InExBTW,
-    MutatieSoort,
+    "BedrijfParticulier",
+    "BtwCode",
+    "btw_codes_hoog",
+    "btw_codes_laag",
+    "btw_codes_geen",
+    "InExBTW",
+    "MutatieSoort",
 ]

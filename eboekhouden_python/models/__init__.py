@@ -7,9 +7,9 @@ from .relatie import Relatie
 
 
 __all__ = [
-    MutatieFilter,
-    MutatieRegel,
-    Mutatie,
-    RelatieFilter,
-    Relatie,
+    "MutatieFilter",
+    "MutatieRegel",
+    "Mutatie",
+    "RelatieFilter",
+    "Relatie",
 ]
