@@ -1,5 +1,5 @@
 """Eboekhouden client."""
-from typing import Optional
+from typing import Optional, Any
 import os
 
 from zeep import Client as ZeepClient
@@ -77,8 +77,13 @@ class EboekhoudenClient:
         factuur_nummer: Optional[str] = None,
         datum_van: Optional[str] = None,
         datum_totmet: Optional[str] = None,
-    ) -> list[dict]:
-        """Get mutaties."""
+        return_zeep_object: bool = False,
+    ) -> list[Any]:
+        """
+        Get mutaties.
+
+        Returns a zeep.objects.cMutatieList, might want to convert to Relatie
+        """
         mutatie_filter = MutatieFilter(
             mutatie_nummer=mutatie_nummer,
             mutatie_nummer_van=mutatie_nummer_van,
@@ -101,7 +106,11 @@ class EboekhoudenClient:
         if mutaties["Mutaties"] is None:
             return []
 
-        return mutaties["Mutaties"]["cMutatieList"]
+        if return_zeep_object:
+            return mutaties["Mutaties"]["cMutatieList"]
+
+        mutatie_objects = [Mutatie.from_zeep(x) for x in mutaties["Mutaties"]["cMutatieList"]]
+        return mutatie_objects
 
     def add_mutatie(self, mutatie: Mutatie) -> str:
         """Add mutatie."""
@@ -127,12 +136,9 @@ class EboekhoudenClient:
         trefwoord: Optional[str] = None,
         relatie_code: Optional[str] = None,
         id: Optional[int] = None,
-    ) -> list[dict]:
-        """
-        Get relaties.
-
-        Results are capped to maximum of 100 records.
-        """
+        return_zeep_object: bool = False,
+    ) -> list[Any]:
+        """Get relaties."""
         relatie_filter = RelatieFilter(trefwoord=trefwoord, code=relatie_code, id=id)
 
         self.get_session_id()
@@ -148,7 +154,11 @@ class EboekhoudenClient:
         if relaties["Relaties"] is None:
             return []
 
-        return relaties["Relaties"]["cRelatie"]
+        if return_zeep_object:
+            return relaties["Relaties"]["cRelatie"]
+
+        relatie_objects = [Relatie.from_zeep(x) for x in relaties["Relaties"]["cRelatie"]]
+        return relatie_objects
 
     def add_relatie(self, relatie: Relatie) -> str:
         """Add mutatie."""
@@ -166,3 +176,12 @@ class EboekhoudenClient:
             raise ValueError("Error adding mutatie")
 
         return response["Rel_ID"]
+
+    def mutatie_exists(self, mutatie: Mutatie) -> bool:
+        """Check if mutatie already exists in E-boekhouden by matching the date and omschrijving."""
+        found_mutaties = self.get_mutaties(
+            datum_van=mutatie.datum,
+            datum_totmet=mutatie.datum,
+        )
+        omschrijvingen = [x.omschrijving for x in found_mutaties]
+        return mutatie.omschrijving in omschrijvingen

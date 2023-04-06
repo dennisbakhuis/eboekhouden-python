@@ -2,7 +2,8 @@
 from dataclasses import dataclass
 from typing import Optional
 
-from zeep.xsd import SkipValue as ZeepXsdSkipValue
+from zeep.xsd.const import SkipValue as ZeepXsdSkipValue
+from zeep.helpers import serialize_object
 
 
 @dataclass
@@ -50,6 +51,58 @@ class Relatie:
     geen_email: Optional[str] = None  # String
     gb_id: Optional[str] = None  # String
     nieuwsbrief_groepen_count: Optional[str] = None  # int
+
+    @classmethod
+    def from_zeep(
+        cls,
+        zeep_object,
+    ):  # pragma: no cover
+        """Create a new instance from a zeep object."""
+        serialized_relation = dict(serialize_object(zeep_object))
+        if "AddDatum" in serialized_relation:
+            serialized_relation["AddDatum"] = serialized_relation["AddDatum"].strftime("%Y-%m-%d")
+        return cls(
+            id=serialized_relation.get("ID"),
+            add_datum=serialized_relation.get("AddDatum"),
+            bedrijf_particulier=serialized_relation.get("BP"),  # type: ignore
+            relatie_code=serialized_relation.get("Code"),  # type: ignore
+            bedrijf=serialized_relation.get("Bedrijf"),  # type: ignore
+            contact_person=serialized_relation.get("Contactpersoon"),
+            geslacht=serialized_relation.get("Geslacht"),
+            adres=serialized_relation.get("Adres"),
+            postcode=serialized_relation.get("Postcode"),
+            plaats=serialized_relation.get("Plaats"),
+            land=serialized_relation.get("Land"),
+            adres2=serialized_relation.get("Adres2"),
+            postcode2=serialized_relation.get("Postcode2"),
+            plaats2=serialized_relation.get("Plaats2"),
+            land2=serialized_relation.get("Land2"),
+            telefoon=serialized_relation.get("Telefoon"),
+            gsm=serialized_relation.get("GSM"),
+            fax=serialized_relation.get("Fax"),
+            email=serialized_relation.get("Email"),
+            website=serialized_relation.get("Website"),
+            notitie=serialized_relation.get("Notitie"),
+            btw_nummer=serialized_relation.get("BTWNummer"),
+            kvk_nummer=serialized_relation.get("KVKNummer"),
+            aanhef=serialized_relation.get("Aanhef"),
+            iban=serialized_relation.get("IBAN"),
+            bic=serialized_relation.get("BIC"),
+            def1=serialized_relation.get("Def1"),
+            def2=serialized_relation.get("Def2"),
+            def3=serialized_relation.get("Def3"),
+            def4=serialized_relation.get("Def4"),
+            def5=serialized_relation.get("Def5"),
+            def6=serialized_relation.get("Def6"),
+            def7=serialized_relation.get("Def7"),
+            def8=serialized_relation.get("Def8"),
+            def9=serialized_relation.get("Def9"),
+            def10=serialized_relation.get("Def10"),
+            leden_administratie=serialized_relation.get("LedenAdministratie"),
+            geen_email=serialized_relation.get("GeenEmail"),
+            gb_id=serialized_relation.get("GBID"),
+            nieuwsbrief_groepen_count=serialized_relation.get("NieuwsbriefGroepenCount"),
+        )
 
     def export(self, additional_fields: bool = False):
         """Export to structure used in SOAP of E-Boekhouden.nl."""

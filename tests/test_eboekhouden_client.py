@@ -7,6 +7,20 @@ from eboekhouden_python.constants import BedrijfParticulier
 from .mock_server import MockServer
 
 
+mutatie = Mutatie(
+    soort="test",
+    datum="2023-04-01",
+    rekening="test",
+    relatie_code="test",
+    factuur_nummer="test",
+    omschrijving="test",
+    betalingstermijn="test",
+    inclusief_exclusief_btw="test",
+    mutatie_regels=[],
+    mutatie_nummer="test",
+)
+
+
 def test_eboekhouden_client_init_fail(monkeypatch):
     # Test if the client fails when no credentials are provided
     monkeypatch.delenv("EBOEKHOUDEN_USERNAME", raising=False)
@@ -73,6 +87,12 @@ def test_eboekhouden_client_get_mutaties(client):
     # Test if we can get mutaties
     mutaties = client.get_mutaties()
     assert len(mutaties) == 1
+    assert isinstance(mutaties[0], Mutatie)
+
+    # Test to retrieve "zeep" object (here it is a dict)
+    mutaties = client.get_mutaties(return_zeep_object=True)
+    assert len(mutaties) == 1
+    assert isinstance(mutaties[0], dict)
 
     # Test if we get empty list when no mutaties are found
     mutaties = client.get_mutaties(mutatie_nummer="test")
@@ -81,18 +101,6 @@ def test_eboekhouden_client_get_mutaties(client):
 
 def test_eboekhouden_client_add_mutatie(client):
     # Test to add a mutatie
-    mutatie = Mutatie(
-        soort="test",
-        datum="test",
-        rekening="test",
-        relatie_code="test",
-        factuur_nummer="test",
-        omschrijving="test",
-        betalingstermijn="test",
-        inclusief_exclusief_btw="test",
-        mutatie_regels=[],
-        mutatie_nummer="test",
-    )
     response = client.add_mutatie(mutatie)
     assert response == "test"
 
@@ -106,6 +114,12 @@ def test_eboekhouden_client_get_relaties(client):
     # Test if we can get relatie
     relatie = client.get_relaties()
     assert len(relatie) == 1
+    assert isinstance(relatie[0], Relatie)
+
+    # Test to retrieve "zeep" object (here it is a dict)
+    relatie = client.get_relaties(return_zeep_object=True)
+    assert len(relatie) == 1
+    assert isinstance(relatie[0], dict)
 
     # Test if we get empty list when no relatie is found
     relatie = client.get_relaties(relatie_code="test")
@@ -126,3 +140,8 @@ def test_eboekhouden_client_add_relatie(client):
     with pytest.raises(ValueError):
         relatie.relatie_code = "Nope"
         client.add_relatie(relatie)
+
+
+def test_eboekhouden_client_mutatie_exists(client):
+    # Test if we can check if a mutatie exists
+    assert client.mutatie_exists(mutatie)

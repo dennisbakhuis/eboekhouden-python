@@ -2,7 +2,7 @@
 from dataclasses import dataclass
 from typing import Optional
 
-from zeep.xsd import SkipValue as ZeepXsdSkipValue
+from zeep.xsd.const import SkipValue as ZeepXsdSkipValue
 
 
 @dataclass

@@ -1,4 +1,7 @@
-from zeep.xsd import SkipValue as ZeepXsdSkipValue
+from decimal import Decimal
+from collections import OrderedDict
+
+from zeep.xsd.const import SkipValue as ZeepXsdSkipValue
 import pytest
 
 from eboekhouden_python.models import MutatieRegel
@@ -8,45 +11,45 @@ from eboekhouden_python.constants import BtwCode
 def test_mutatie_regel_fully_filled():
     """Test MutatieRegel."""
     mutatie_regel = MutatieRegel(
-        bedrag_invoer=1.0,
-        bedrag_exclusief_btw=1.0,
-        bedrag_btw=1.0,
-        bedrag_inclusief_btw=1.0,
+        bedrag_invoer="1.0",
+        bedrag_exclusief_btw="1.0",
+        bedrag_btw="1.0",
+        bedrag_inclusief_btw="1.0",
         btw_code="1",
-        btw_percentage=1.0,
+        btw_percentage="1.0",
         tegenrekening_code="1",
-        kostenplaats_id=1,
+        kostenplaats_id="1",
     )
     assert mutatie_regel.export() == {
-        "BedragInvoer": 1.0,
-        "BedragExclBTW": 1.0,
-        "BedragBTW": 1.0,
-        "BedragInclBTW": 1.0,
+        "BedragInvoer": "1.0",
+        "BedragExclBTW": "1.0",
+        "BedragBTW": "1.0",
+        "BedragInclBTW": "1.0",
         "BTWCode": "1",
-        "BTWPercentage": 1.0,
+        "BTWPercentage": "1.0",
         "TegenrekeningCode": "1",
-        "KostenplaatsID": 1,
+        "KostenplaatsID": "1",
     }
 
 
 def test_mutatie_regel_partially_filled():
     """Test MutatieRegel."""
     mutatie_regel = MutatieRegel(
-        bedrag_invoer=1.0,
-        bedrag_exclusief_btw=1.0,
-        bedrag_btw=1.0,
-        bedrag_inclusief_btw=1.0,
+        bedrag_invoer="1.0",
+        bedrag_exclusief_btw="1.0",
+        bedrag_btw="1.0",
+        bedrag_inclusief_btw="1.0",
         btw_code="1",
-        btw_percentage=1.0,
+        btw_percentage="1.0",
         tegenrekening_code="1",
     )
     assert mutatie_regel.export() == {
-        "BedragInvoer": 1.0,
-        "BedragExclBTW": 1.0,
-        "BedragBTW": 1.0,
-        "BedragInclBTW": 1.0,
+        "BedragInvoer": "1.0",
+        "BedragExclBTW": "1.0",
+        "BedragBTW": "1.0",
+        "BedragInclBTW": "1.0",
         "BTWCode": "1",
-        "BTWPercentage": 1.0,
+        "BTWPercentage": "1.0",
         "TegenrekeningCode": "1",
         "KostenplaatsID": ZeepXsdSkipValue,
     }
@@ -105,7 +108,7 @@ def test_mutatie_regel_from_bedrag():
     with pytest.raises(ValueError):
         MutatieRegel.from_bedrag(
             bedrag_invoer=100,
-            btw_code="",
+            btw_code="",  # type: ignore
             tegenrekening_code="1",
         )
 
@@ -122,3 +125,30 @@ def test_mutatie_to_string():
         tegenrekening_code="1",
     )
     assert mutatie_regel.to_string() == "Mutatieregel(1.21, 21%, 1)"
+
+
+def test_mutatie_regel_from_zeep():
+    zeep_mutatie_regel = OrderedDict(
+        [
+            ("BedragInvoer", Decimal("293")),
+            ("BedragExclBTW", Decimal("293")),
+            ("BedragBTW", Decimal("0.0000")),
+            ("BedragInclBTW", Decimal("293.0000")),
+            ("BTWCode", "GEEN"),
+            ("BTWPercentage", Decimal("0.0000")),
+            ("Factuurnummer", None),
+            ("TegenrekeningCode", "8140"),
+            ("KostenplaatsID", "0"),
+        ]
+    )
+    mutatie_regel = MutatieRegel.from_zeep(zeep_mutatie_regel)
+    assert mutatie_regel.export() == {
+        "BedragInvoer": "293.00",
+        "BedragExclBTW": "293.00",
+        "BedragBTW": "0.00",
+        "BedragInclBTW": "293.00",
+        "BTWCode": "GEEN",
+        "BTWPercentage": "0",
+        "TegenrekeningCode": "8140",
+        "KostenplaatsID": "0",
+    }

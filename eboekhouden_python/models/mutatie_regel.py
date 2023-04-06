@@ -1,8 +1,9 @@
 """Row in a Mutatie of E-boekhouden.nl."""
 from dataclasses import dataclass
 from typing import Optional
+from collections import OrderedDict
 
-from zeep.xsd import SkipValue as ZeepXsdSkipValue
+from zeep.xsd.const import SkipValue as ZeepXsdSkipValue
 
 from ..constants import BtwCode, btw_codes_hoog, btw_codes_laag, btw_codes_geen
 
@@ -19,6 +20,24 @@ class MutatieRegel:
     btw_percentage: str  # Decimal
     tegenrekening_code: str  # String
     kostenplaats_id: Optional[str] = None  # Int
+
+    @classmethod
+    def from_zeep(
+        cls,
+        zeep_mutatie_regel_object: OrderedDict,
+    ) -> "MutatieRegel":
+        """Create a MutatieRegel from a zeep object."""
+        short = zeep_mutatie_regel_object
+        return cls(
+            bedrag_invoer=f"{short.get('BedragInvoer'):.2f}",
+            bedrag_exclusief_btw=f"{short.get('BedragExclBTW'):.2f}",
+            bedrag_btw=f"{short.get('BedragBTW'):.2f}",
+            bedrag_inclusief_btw=f"{short.get('BedragInclBTW'):.2f}",
+            btw_code=f"{short.get('BTWCode')}",
+            btw_percentage=f"{int(short.get('BTWPercentage'))}",  # type: ignore
+            tegenrekening_code=short.get("TegenrekeningCode"),  # type: ignore
+            kostenplaats_id=short.get("KostenplaatsID"),
+        )
 
     @classmethod
     def from_bedrag(
