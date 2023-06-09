@@ -126,7 +126,7 @@ class EboekhoudenClient:
 
         self._check_response(response)
 
-        if response["Mutatienummer"] is None:
+        if response["Mutatienummer"] is None or response["Mutatienummer"] == 0:
             raise ValueError("Error adding mutatie")
 
         return response["Mutatienummer"]
