@@ -110,7 +110,7 @@ def test_relatie_partially_filled_additional_fields():
         Def8="1",
         Def9="1",
         Def10="1",
-        LedenAdministratie="1",
+        LA="1",
     )
 
 
