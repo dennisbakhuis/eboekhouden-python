@@ -160,14 +160,14 @@ class EboekhoudenClient:
         relatie_objects = [Relatie.from_zeep(x) for x in relaties["Relaties"]["cRelatie"]]
         return relatie_objects
 
-    def add_relatie(self, relatie: Relatie) -> str:
+    def add_relatie(self, relatie: Relatie, additional_fields: bool = False) -> str:
         """Add mutatie."""
         self.get_session_id()
 
         response = self._client.service.AddRelatie(
             SessionID=self._session_id,
             SecurityCode2=self._code2,
-            oRel=relatie.export(),
+            oRel=relatie.export(additional_fields),
         )
 
         self._check_response(response)
