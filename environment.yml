@@ -2,4 +2,4 @@ name: eboekhouden-python
 channels:
   - default
 dependencies:
-  - python=3.11
+  - python=3.13

@@ -3,7 +3,7 @@ from .eboekhouden_client import EboekhoudenClient
 from . import models
 from . import constants
 
-__version__ = "0.2.0"
+__version__ = "0.3.0"
 __all__ = [
     "EboekhoudenClient",
     "models",
