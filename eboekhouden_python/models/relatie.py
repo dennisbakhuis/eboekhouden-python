@@ -98,7 +98,7 @@ class Relatie:
             def8=serialized_relation.get("Def8"),
             def9=serialized_relation.get("Def9"),
             def10=serialized_relation.get("Def10"),
-            leden_administratie=serialized_relation.get("LedenAdministratie"),
+            leden_administratie=serialized_relation.get("LA"),
             geen_email=serialized_relation.get("GeenEmail"),
             gb_id=serialized_relation.get("GBID"),
             nieuwsbrief_groepen_count=serialized_relation.get("NieuwsbriefGroepenCount"),
@@ -150,7 +150,7 @@ class Relatie:
                 Def8=self.def8 or ZeepXsdSkipValue,
                 Def9=self.def9 or ZeepXsdSkipValue,
                 Def10=self.def10 or ZeepXsdSkipValue,
-                LedenAdministratie=self.leden_administratie or ZeepXsdSkipValue,
+                LA=self.leden_administratie or ZeepXsdSkipValue,
             )
         return export_dict
 
