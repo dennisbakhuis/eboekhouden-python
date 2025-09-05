@@ -90,8 +90,37 @@ jobs:
         pypi = version.parse('$PYPI_VERSION')
         if current > pypi:
             print(f'✅ Version {current} > {pypi}, version check passed')
+            # Add success to job summary
+            with open('$GITHUB_STEP_SUMMARY', 'w') as f:
+                f.write(f'''# ✅ Version Check Passed
+        
+        **Current version in pyproject.toml**: \`{current}\`
+        **Latest version on PyPI**: \`{pypi}\`
+        
+        The version has been properly bumped and is ready for publishing after merge!
+        ''')
         else:
-            print(f'❌ Version {current} <= {pypi}, please bump the version in pyproject.toml')
+            error_msg = f'Version {current} is not greater than PyPI version {pypi}'
+            print(f'::error title=Version Check Failed::{error_msg}')
+            print(f'::notice title=Action Required::Please bump the version in pyproject.toml to a version higher than {pypi}')
+            # Add to job summary
+            with open('$GITHUB_STEP_SUMMARY', 'w') as f:
+                f.write(f'''# ❌ Version Check Failed
+        
+        **Current version in pyproject.toml**: \`{current}\`
+        **Latest version on PyPI**: \`{pypi}\`
+        
+        ## 🔧 How to fix:
+        
+        1. Open \`pyproject.toml\`
+        2. Update the version field to a higher version (e.g., \`{current.major}.{current.minor}.{current.micro + 1}\`)
+        3. Commit and push your changes
+        
+        ## 📋 Version bump examples:
+        - **Patch**: \`{current.major}.{current.minor}.{current.micro + 1}\` (bug fixes)
+        - **Minor**: \`{current.major}.{current.minor + 1}.0\` (new features)  
+        - **Major**: \`{current.major + 1}.0.0\` (breaking changes)
+        ''')
             sys.exit(1)
         "
         
