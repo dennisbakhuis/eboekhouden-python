@@ -1,13 +1,13 @@
-[tool.poetry]
+[project]
 name = "eboekhouden-python"
 version = "0.3.0"
 description = "This is a simple API client for the E-boekhouden.nl API. It is written in Python and uses the ZEEP library."
-authors = ["Dennis Bakhuis <pypi@bakhuis.nu>"]
+authors = [
+    { name = "Dennis Bakhuis", email = "pypi@bakhuis.nu" }
+]
 readme = "README.md"
-packages = [{ include = "eboekhouden_python" }]
-license = "MIT"
-homepage = "https://github.com/dennisbakhuis/eboekhouden-python"
-repository = "https://github.com/dennisbakhuis/eboekhouden-python"
+license = { text = "MIT" }
+requires-python = ">=3.10"
 keywords = [
   "e-boekhouden",
   "eboekhouden",
@@ -17,27 +17,43 @@ keywords = [
   "client",
   "python",
 ]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+]
+dependencies = [
+    "zeep>=4.3.1",
+]
 
-[tool.poetry.dependencies]
-python = ">=3.10,<3.14"
-zeep = "^4.3.1"
+[project.optional-dependencies]
+dev = [
+    "jupyterlab>=4.3.4",
+    "pre-commit>=4.0.1",
+    "pytest>=8.3.4",
+    "jupyter>=1.1.1",
+    "pytest-cov>=6.0.0",
+    "coverage>=7.6.10",
+    "tomli>=2.2.1",
+    "packaging>=23.0",
+]
 
-[tool.poetry.group.dev.dependencies]
-jupyterlab = "^4.3.4"
-pre-commit = "^4.0.1"
-pytest = "^8.3.4"
-jupyter = "^1.1.1"
-pytest-cov = "^6.0.0"
-coverage = "^7.6.10"
-tomli = "^2.2.1"
+[project.urls]
+Homepage = "https://github.com/dennisbakhuis/eboekhouden-python"
+Repository = "https://github.com/dennisbakhuis/eboekhouden-python"
 
 [tool.ruff]
 line-length = 100
 exclude = [".ipynb"]
 
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
 [tool.pydocstyle]
 convention = "numpy"
