@@ -70,13 +70,13 @@ jobs:
       run: |
         CURRENT="${{ steps.get_versions.outputs.current_version }}"
         PYPI="${{ steps.get_versions.outputs.pypi_version }}"
-        SHOULD=$(
-          uv run python - <<PY
-from packaging import version
-import sys
-print("true" if version.parse("$CURRENT") > version.parse("$PYPI") else "false")
-PY
-        )
+        SHOULD=$(uv run python -c "
+        from packaging import version
+        import sys
+        current = version.parse('$CURRENT')
+        pypi = version.parse('$PYPI')
+        print('true' if current > pypi else 'false')
+        ")
         echo "should_publish=$SHOULD" >> $GITHUB_OUTPUT
       # Optional short summary for quick debug in Checks
     - name: Summary
