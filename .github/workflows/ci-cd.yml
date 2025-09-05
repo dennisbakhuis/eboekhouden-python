@@ -82,21 +82,20 @@ jobs:
         PYPI_VERSION=$(curl -s https://pypi.org/pypi/eboekhouden-python/json | jq -r '.info.version // "0.0.0"')
         echo "PyPI version: $PYPI_VERSION"
         
-        # Compare versions using Python
-        SHOULD_PUBLISH=$(uv run python -c "
+        # Compare versions using Python and fail if not greater
+        uv run python -c "
         from packaging import version
         import sys
         current = version.parse('$CURRENT_VERSION')
         pypi = version.parse('$PYPI_VERSION')
-        should_publish = current > pypi
-        print('true' if should_publish else 'false')
-        if should_publish:
-            print(f'✅ Version {current} > {pypi}, will publish', file=sys.stderr)
+        if current > pypi:
+            print(f'✅ Version {current} > {pypi}, version check passed')
         else:
-            print(f'❌ Version {current} <= {pypi}, will skip publishing', file=sys.stderr)
-        ")
+            print(f'❌ Version {current} <= {pypi}, please bump the version in pyproject.toml')
+            sys.exit(1)
+        "
         
-        echo "should_publish=$SHOULD_PUBLISH" >> $GITHUB_OUTPUT
+        echo "should_publish=true" >> $GITHUB_OUTPUT
 
   publish:
     name: Publish to PyPI
