@@ -11,22 +11,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
-    
     - name: Install uv
       uses: astral-sh/setup-uv@v3
-      with:
-        version: "latest"
-    
+      with: { version: "latest" }
     - name: Set up Python
       run: uv python install
-    
     - name: Install dependencies
       run: uv sync --extra dev
-    
     - name: Run tests with coverage
       run: |
         uv run pytest --cov=eboekhouden_python --cov-report=xml --cov-report=term-missing
-    
     - name: Check coverage threshold
       run: |
         COVERAGE_PERCENTAGE=$(uv run coverage report --format=total)
@@ -36,12 +30,10 @@ jobs:
         coverage = float('$COVERAGE_PERCENTAGE')
         threshold = 95.0
         if coverage < threshold:
-            print(f'❌ Coverage is {coverage}%, which is below the {threshold}% threshold')
-            sys.exit(1)
+            print(f'❌ Coverage is {coverage}%, which is below the {threshold}% threshold'); sys.exit(1)
         else:
             print(f'✅ Coverage is {coverage}%, which meets the {threshold}% threshold')
         "
-    
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v4
       if: always()
@@ -55,8 +47,9 @@ jobs:
     needs: test
     if: github.event_name == 'pull_request' && github.base_ref == 'main'
     outputs:
-      should_publish: ${{ steps.version_check.outputs.should_publish }}
-      current_version: ${{ steps.version_check.outputs.current_version }}
+      current_version: ${{ steps.get_versions.outputs.current_version }}
+      pypi_version: ${{ steps.get_versions.outputs.pypi_version }}
+      should_publish: ${{ steps.compare.outputs.should_publish }}
     steps:
     - uses: actions/checkout@v4
     
@@ -85,7 +78,7 @@ jobs:
         echo "pypi_version=$PYPI_VERSION" >> $GITHUB_OUTPUT
 
     - name: Version Check
-      id: version_check
+      id: compare
       shell: bash
       run: |
         set +e
@@ -140,13 +133,7 @@ jobs:
             echo "**Quick fix:** Update the \`version\` field in \`pyproject.toml\` to a higher version than \`$PYPI_VERSION\`"
           } >> "$GITHUB_STEP_SUMMARY"
 
-          # Expose error for later steps if needed
-          {
-            echo "short_error<<'EOF'"
-            echo "$short"
-            echo "EOF"
-          } >> "$GITHUB_OUTPUT"
-
+          echo "should_publish=false" >> $GITHUB_OUTPUT
           exit $code
         else
           # Success case
@@ -158,6 +145,8 @@ jobs:
             echo ""
             echo "Version has been properly bumped and is ready for publishing after merge!"
           } >> "$GITHUB_STEP_SUMMARY"
+          
+          echo "should_publish=true" >> $GITHUB_OUTPUT
         fi
 
   publish:
@@ -165,22 +154,19 @@ jobs:
     runs-on: ubuntu-latest
     needs: test
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    environment: 
+    environment:
       name: pypi
       url: https://pypi.org/p/eboekhouden-python
     permissions:
-      id-token: write      # For PyPI trusted publishing
+      id-token: write      # PyPI trusted publishing
+      contents: write      # create GitHub release
     steps:
     - uses: actions/checkout@v4
-    
     - name: Install uv
       uses: astral-sh/setup-uv@v3
-      with:
-        version: "latest"
-    
+      with: { version: "latest" }
     - name: Set up Python
       run: uv python install
-    
     - name: Install dependencies
       run: uv sync --extra dev
     
@@ -196,45 +182,36 @@ jobs:
         PYPI_VERSION=$(curl -s https://pypi.org/pypi/eboekhouden-python/json | jq -r '.info.version // "0.0.0"')
         echo "PyPI version: $PYPI_VERSION"
         
-        # Compare versions using Python
-        SHOULD_PUBLISH=$(uv run python -c "
+        # Compare versions using Python and fail if not greater
+        uv run python -c "
         from packaging import version
         import sys
         current = version.parse('$CURRENT_VERSION')
         pypi = version.parse('$PYPI_VERSION')
-        should_publish = current > pypi
-        print('true' if should_publish else 'false')
-        if should_publish:
-            print(f'✅ Version {current} > {pypi}, will publish', file=sys.stderr)
+        if current > pypi:
+            print(f'✅ Version {current} > {pypi}, will publish')
         else:
-            print(f'❌ Version {current} <= {pypi}, will skip publishing', file=sys.stderr)
+            print(f'❌ Version {current} <= {pypi}, skipping publish')
             sys.exit(1)
-        ")
+        "
     
     - name: Build package
       run: uv build
-    
     - name: Publish to PyPI
       uses: pypa/gh-action-pypi-publish@release/v1
-      with:
-        print-hash: true
-    
+      with: { print-hash: true }
     - name: Create GitHub Release
-      run: |
-        VERSION="${{ steps.version_check.outputs.current_version }}"
-        gh release create "v${VERSION}" \
-          --title "Release v${VERSION}" \
-          --notes "## Changes
+      uses: softprops/action-gh-release@v2
+      with:
+        tag_name: v${{ steps.version_check.outputs.current_version }}
+        name: Release v${{ steps.version_check.outputs.current_version }}
+        body: |
+          ## Changes
+          Automated release of version ${{ steps.version_check.outputs.current_version }}
 
-        Automated release of version ${VERSION}
-
-        ## Installation
-
-        \`\`\`bash
-        pip install eboekhouden-python==${VERSION}
-        \`\`\`
-
-        ## What's Changed
-        - Published to PyPI: https://pypi.org/project/eboekhouden-python/${VERSION}/"
+          ## Installation
+          ```bash
+          pip install eboekhouden-python==${{ steps.version_check.outputs.current_version }}
+          ```
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

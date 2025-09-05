@@ -1,6 +1,6 @@
 [project]
 name = "eboekhouden-python"
-version = "0.4.1"
+version = "0.4.2"
 description = "This is a simple API client for the E-boekhouden.nl API. It is written in Python and uses the ZEEP library."
 authors = [
     { name = "Dennis Bakhuis", email = "pypi@bakhuis.nu" }
