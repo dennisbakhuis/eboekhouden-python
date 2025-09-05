@@ -3,6 +3,7 @@ name: CI/CD Pipeline
 on:
   pull_request:
   push:
+    branches: [ main ]
 
 jobs:
   test:
@@ -70,8 +71,8 @@ jobs:
     - name: Install dependencies
       run: uv sync --extra dev
     
-    - name: Check version against PyPI
-      id: version_check
+    - name: Get version information
+      id: get_versions
       run: |
         # Get current version from pyproject.toml
         CURRENT_VERSION=$(uv run python -c "import tomli; print(tomli.load(open('pyproject.toml', 'rb'))['project']['version'])")
@@ -81,6 +82,12 @@ jobs:
         # Get latest version from PyPI
         PYPI_VERSION=$(curl -s https://pypi.org/pypi/eboekhouden-python/json | jq -r '.info.version // "0.0.0"')
         echo "PyPI version: $PYPI_VERSION"
+        echo "pypi_version=$PYPI_VERSION" >> $GITHUB_OUTPUT
+
+    - name: "Version Check: ${{ steps.get_versions.outputs.current_version }} vs ${{ steps.get_versions.outputs.pypi_version }} (PyPI)"
+      run: |
+        CURRENT_VERSION="${{ steps.get_versions.outputs.current_version }}"
+        PYPI_VERSION="${{ steps.get_versions.outputs.pypi_version }}"
         
         # Compare versions using Python and fail if not greater
         uv run python -c "
@@ -89,7 +96,7 @@ jobs:
         current = version.parse('$CURRENT_VERSION')
         pypi = version.parse('$PYPI_VERSION')
         if current > pypi:
-            print(f'✅ Version {current} > {pypi}, version check passed')
+            print(f'✅ Version {current} > {pypi} - Version check passed!')
             # Add success to job summary
             with open('$GITHUB_STEP_SUMMARY', 'w') as f:
                 f.write(f'''# ✅ Version Check Passed
@@ -100,10 +107,12 @@ jobs:
         The version has been properly bumped and is ready for publishing after merge!
         ''')
         else:
-            error_msg = f'Version {current} is not greater than PyPI version {pypi}'
-            print(f'::error title=Version Check Failed::{error_msg}')
-            print(f'::notice title=Action Required::Please bump the version in pyproject.toml to a version higher than {pypi}')
-            # Add to job summary
+            print(f'❌ FAILURE: Version {current} is NOT greater than PyPI version {pypi}')
+            print(f'')
+            print(f'🔧 TO FIX: Bump version in pyproject.toml to something higher than {pypi}')
+            print(f'   Examples: {current.major}.{current.minor}.{current.micro + 1} (patch) or {current.major}.{current.minor + 1}.0 (minor)')
+            print(f'')
+            # Add to job summary  
             with open('$GITHUB_STEP_SUMMARY', 'w') as f:
                 f.write(f'''# ❌ Version Check Failed
         
@@ -113,18 +122,16 @@ jobs:
         ## 🔧 How to fix:
         
         1. Open \`pyproject.toml\`
-        2. Update the version field to a higher version (e.g., \`{current.major}.{current.minor}.{current.micro + 1}\`)
+        2. Update the version field to a higher version
         3. Commit and push your changes
         
-        ## 📋 Version bump examples:
+        ## 📋 Suggested version bumps:
         - **Patch**: \`{current.major}.{current.minor}.{current.micro + 1}\` (bug fixes)
         - **Minor**: \`{current.major}.{current.minor + 1}.0\` (new features)  
         - **Major**: \`{current.major + 1}.0.0\` (breaking changes)
         ''')
             sys.exit(1)
         "
-        
-        echo "should_publish=true" >> $GITHUB_OUTPUT
 
   publish:
     name: Publish to PyPI
