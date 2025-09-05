@@ -1,8 +1,8 @@
 import pytest
 
 from eboekhouden_python import EboekhoudenClient
-from eboekhouden_python.models import Mutatie, Relatie
-from eboekhouden_python.constants import BedrijfParticulier
+from eboekhouden_python.models import Mutatie, Relatie, OpenPost
+from eboekhouden_python.constants import BedrijfParticulier, OpenPostSoort
 
 from .mock_server import MockServer
 
@@ -145,3 +145,17 @@ def test_eboekhouden_client_add_relatie(client):
 def test_eboekhouden_client_mutatie_exists(client):
     # Test if we can check if a mutatie exists
     assert client.mutatie_exists(mutatie)
+
+
+def test_eboekhouden_client_get_open_posten(client):
+    # Test if we can get open posten
+    open_posten = client.get_open_posten(OpenPostSoort.debiteuren)
+    assert len(open_posten) == 1
+    assert isinstance(open_posten[0], OpenPost)
+    assert open_posten[0].factuur_nummer == "INV-001"
+    assert open_posten[0].relatie_code == "REL-001"
+    assert open_posten[0].relatie_bedrijf == "Test Company"
+    assert open_posten[0].factuur_bedrag == "1000.00"
+    assert open_posten[0].bedrag_voldaan == "500.00"
+    assert open_posten[0].bedrag_openstaand == "500.00"
+    assert open_posten[0].soort == OpenPostSoort.debiteuren

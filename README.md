@@ -30,7 +30,12 @@ mutations = client.get_mutaties()
 Feel free to extend the library, pull requests are welcome. For a development environment, you can use the following commands:
 
 ```bash
-conda env create -f environment.yml
-poetry install
-pre-commit install
+# Install uv if you haven't already
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Install dependencies and create virtual environment
+uv sync --extra dev
+
+# Install pre-commit hooks
+uv run pre-commit install
 ```

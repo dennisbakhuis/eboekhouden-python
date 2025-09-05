@@ -159,6 +159,25 @@ class MockServices:
             "Rel_ID": oRel["Code"],
         }
 
+    def GetOpenPosten(self, SessionID, SecurityCode2, OpSoort):
+        """Get fake open posten."""
+        return {
+            "ErrorMsg": None,
+            "Openposten": {
+                "cOpenPost": [
+                    {
+                        "MutDatum": datetime.datetime(2023, 4, 1, 0, 0),
+                        "MutFactuur": "INV-001",
+                        "RelCode": "REL-001",
+                        "RelBedrijf": "Test Company",
+                        "Bedrag": "1000.00",
+                        "Voldaan": "500.00",
+                        "Openstaand": "500.00",
+                    }
+                ]
+            },
+        }
+
 
 class MockServer:
     """Mock server."""

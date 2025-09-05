@@ -1,0 +1,240 @@
+name: CI/CD Pipeline
+
+on:
+  pull_request:
+  push:
+    branches: [ main ]
+
+jobs:
+  test:
+    name: Test and Coverage
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Install uv
+      uses: astral-sh/setup-uv@v3
+      with:
+        version: "latest"
+    
+    - name: Set up Python
+      run: uv python install
+    
+    - name: Install dependencies
+      run: uv sync --extra dev
+    
+    - name: Run tests with coverage
+      run: |
+        uv run pytest --cov=eboekhouden_python --cov-report=xml --cov-report=term-missing
+    
+    - name: Check coverage threshold
+      run: |
+        COVERAGE_PERCENTAGE=$(uv run coverage report --format=total)
+        echo "Coverage is ${COVERAGE_PERCENTAGE}%"
+        uv run python -c "
+        import sys
+        coverage = float('$COVERAGE_PERCENTAGE')
+        threshold = 95.0
+        if coverage < threshold:
+            print(f'❌ Coverage is {coverage}%, which is below the {threshold}% threshold')
+            sys.exit(1)
+        else:
+            print(f'✅ Coverage is {coverage}%, which meets the {threshold}% threshold')
+        "
+    
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v4
+      if: always()
+      with:
+        file: ./coverage.xml
+        fail_ci_if_error: false
+
+  version-check:
+    name: Version Check
+    runs-on: ubuntu-latest
+    needs: test
+    if: github.event_name == 'pull_request' && github.base_ref == 'main'
+    outputs:
+      should_publish: ${{ steps.version_check.outputs.should_publish }}
+      current_version: ${{ steps.version_check.outputs.current_version }}
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Install uv
+      uses: astral-sh/setup-uv@v3
+      with:
+        version: "latest"
+    
+    - name: Set up Python
+      run: uv python install
+    
+    - name: Install dependencies
+      run: uv sync --extra dev
+    
+    - name: Get version information
+      id: get_versions
+      run: |
+        # Get current version from pyproject.toml
+        CURRENT_VERSION=$(uv run python -c "import tomli; print(tomli.load(open('pyproject.toml', 'rb'))['project']['version'])")
+        echo "Current version: $CURRENT_VERSION"
+        echo "current_version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
+        
+        # Get latest version from PyPI
+        PYPI_VERSION=$(curl -s https://pypi.org/pypi/eboekhouden-python/json | jq -r '.info.version // "0.0.0"')
+        echo "PyPI version: $PYPI_VERSION"
+        echo "pypi_version=$PYPI_VERSION" >> $GITHUB_OUTPUT
+
+    - name: Version Check
+      id: version_check
+      shell: bash
+      run: |
+        set +e
+        
+        CURRENT_VERSION="${{ steps.get_versions.outputs.current_version }}"
+        PYPI_VERSION="${{ steps.get_versions.outputs.pypi_version }}"
+        
+        # Run version check and capture output
+        uv run python -c "
+        from packaging import version
+        import sys
+        current = version.parse('$CURRENT_VERSION')
+        pypi = version.parse('$PYPI_VERSION')
+        if current > pypi:
+            print(f'✅ Version check passed: {current} > {pypi}')
+        else:
+            print(f'❌ Version check failed: {current} <= {pypi}')
+            print(f'')
+            print(f'Current version in pyproject.toml: {current}')
+            print(f'Latest version on PyPI: {pypi}')
+            print(f'')
+            print(f'To fix: Bump version in pyproject.toml to something higher than {pypi}')
+            print(f'Examples:')
+            print(f'  - Patch: {current.major}.{current.minor}.{current.micro + 1} (for bug fixes)')
+            print(f'  - Minor: {current.major}.{current.minor + 1}.0 (for new features)')
+            print(f'  - Major: {current.major + 1}.0.0 (for breaking changes)')
+            sys.exit(1)
+        " > vc.out 2>&1
+        code=$?
+
+        if [ $code -ne 0 ]; then
+          short="$(cat vc.out)"
+          
+          # Error annotation (appears in PR checks)
+          echo "::error title=Version check failed::Version $CURRENT_VERSION is not greater than PyPI version $PYPI_VERSION. Please bump the version in pyproject.toml"
+          
+          # Optional: point to pyproject.toml file
+          echo "::error file=pyproject.toml,line=3,title=Version needs to be bumped::Current: $CURRENT_VERSION, PyPI: $PYPI_VERSION"
+
+          # Step summary (visible box in PR Checks UI)
+          {
+            echo "### ❌ Version check failed"
+            echo ""
+            echo "**Current version:** \`$CURRENT_VERSION\`"
+            echo "**PyPI version:** \`$PYPI_VERSION\`"
+            echo ""
+            echo "**Error details:**"
+            echo '```'
+            echo "$short"
+            echo '```'
+            echo ""
+            echo "**Quick fix:** Update the \`version\` field in \`pyproject.toml\` to a higher version than \`$PYPI_VERSION\`"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          # Expose error for later steps if needed
+          {
+            echo "short_error<<'EOF'"
+            echo "$short"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+          exit $code
+        else
+          # Success case
+          {
+            echo "### ✅ Version check passed"
+            echo ""
+            echo "**Current version:** \`$CURRENT_VERSION\`"
+            echo "**PyPI version:** \`$PYPI_VERSION\`"
+            echo ""
+            echo "Version has been properly bumped and is ready for publishing after merge!"
+          } >> "$GITHUB_STEP_SUMMARY"
+        fi
+
+  publish:
+    name: Publish to PyPI
+    runs-on: ubuntu-latest
+    needs: test
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    environment: 
+      name: pypi
+      url: https://pypi.org/p/eboekhouden-python
+    permissions:
+      id-token: write  # IMPORTANT: this permission is mandatory for trusted publishing
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Install uv
+      uses: astral-sh/setup-uv@v3
+      with:
+        version: "latest"
+    
+    - name: Set up Python
+      run: uv python install
+    
+    - name: Install dependencies
+      run: uv sync --extra dev
+    
+    - name: Check version against PyPI
+      id: version_check
+      run: |
+        # Get current version from pyproject.toml
+        CURRENT_VERSION=$(uv run python -c "import tomli; print(tomli.load(open('pyproject.toml', 'rb'))['project']['version'])")
+        echo "Current version: $CURRENT_VERSION"
+        echo "current_version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
+        
+        # Get latest version from PyPI
+        PYPI_VERSION=$(curl -s https://pypi.org/pypi/eboekhouden-python/json | jq -r '.info.version // "0.0.0"')
+        echo "PyPI version: $PYPI_VERSION"
+        
+        # Compare versions using Python
+        SHOULD_PUBLISH=$(uv run python -c "
+        from packaging import version
+        import sys
+        current = version.parse('$CURRENT_VERSION')
+        pypi = version.parse('$PYPI_VERSION')
+        should_publish = current > pypi
+        print('true' if should_publish else 'false')
+        if should_publish:
+            print(f'✅ Version {current} > {pypi}, will publish', file=sys.stderr)
+        else:
+            print(f'❌ Version {current} <= {pypi}, will skip publishing', file=sys.stderr)
+            sys.exit(1)
+        ")
+    
+    - name: Build package
+      run: uv build
+    
+    - name: Publish to PyPI
+      uses: pypa/gh-action-pypi-publish@release/v1
+      with:
+        print-hash: true
+    
+    - name: Create GitHub Release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: v${{ steps.version_check.outputs.current_version }}
+        release_name: Release v${{ steps.version_check.outputs.current_version }}
+        body: |
+          ## Changes
+          
+          Automated release of version ${{ steps.version_check.outputs.current_version }}
+          
+          ## Installation
+          
+          ```bash
+          pip install eboekhouden-python==${{ steps.version_check.outputs.current_version }}
+          ```
+        draft: false
+        prerelease: false
