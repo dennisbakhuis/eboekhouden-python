@@ -1,15 +1,10 @@
 """Eboekhouden client."""
-from typing import Optional, Any
+from typing import List, Literal, Optional, Any
 import os
 
 from zeep import Client as ZeepClient
-
-from .models import (
-    MutatieFilter,
-    Mutatie,
-    RelatieFilter,
-    Relatie,
-)
+from .constants import OpenPostSoort
+from .models import MutatieFilter, Mutatie, RelatieFilter, Relatie, OpenPost
 
 
 class EboekhoudenClient:
@@ -159,6 +154,16 @@ class EboekhoudenClient:
 
         relatie_objects = [Relatie.from_zeep(x) for x in relaties["Relaties"]["cRelatie"]]
         return relatie_objects
+
+    def get_open_posten(self, op_soort: OpenPostSoort) -> List[OpenPost]:
+        """Get open posten."""
+        self.get_session_id()
+        open_posten = self._client.service.GetOpenPosten(
+            SessionID=self._session_id, SecurityCode2=self._code2, OpSoort=op_soort
+        )
+        return [
+            OpenPost.from_zeep(x, soort=op_soort) for x in open_posten["Openposten"]["cOpenPost"]
+        ]
 
     def add_relatie(self, relatie: Relatie, additional_fields: bool = False) -> str:
         """Add mutatie."""
