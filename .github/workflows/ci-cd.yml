@@ -84,54 +84,81 @@ jobs:
         echo "PyPI version: $PYPI_VERSION"
         echo "pypi_version=$PYPI_VERSION" >> $GITHUB_OUTPUT
 
-    - name: "Version Check: ${{ steps.get_versions.outputs.current_version }} vs ${{ steps.get_versions.outputs.pypi_version }} (PyPI)"
+    - name: Version Check
+      id: version_check
+      shell: bash
       run: |
+        set +e
+        
         CURRENT_VERSION="${{ steps.get_versions.outputs.current_version }}"
         PYPI_VERSION="${{ steps.get_versions.outputs.pypi_version }}"
         
-        # Compare versions using Python and fail if not greater
+        # Run version check and capture output
         uv run python -c "
         from packaging import version
         import sys
         current = version.parse('$CURRENT_VERSION')
         pypi = version.parse('$PYPI_VERSION')
         if current > pypi:
-            print(f'✅ Version {current} > {pypi} - Version check passed!')
-            # Add success to job summary
-            with open('$GITHUB_STEP_SUMMARY', 'w') as f:
-                f.write(f'''# ✅ Version Check Passed
-        
-        **Current version in pyproject.toml**: \`{current}\`
-        **Latest version on PyPI**: \`{pypi}\`
-        
-        The version has been properly bumped and is ready for publishing after merge!
-        ''')
+            print(f'✅ Version check passed: {current} > {pypi}')
         else:
-            print(f'❌ FAILURE: Version {current} is NOT greater than PyPI version {pypi}')
+            print(f'❌ Version check failed: {current} <= {pypi}')
             print(f'')
-            print(f'🔧 TO FIX: Bump version in pyproject.toml to something higher than {pypi}')
-            print(f'   Examples: {current.major}.{current.minor}.{current.micro + 1} (patch) or {current.major}.{current.minor + 1}.0 (minor)')
+            print(f'Current version in pyproject.toml: {current}')
+            print(f'Latest version on PyPI: {pypi}')
             print(f'')
-            # Add to job summary  
-            with open('$GITHUB_STEP_SUMMARY', 'w') as f:
-                f.write(f'''# ❌ Version Check Failed
-        
-        **Current version in pyproject.toml**: \`{current}\`
-        **Latest version on PyPI**: \`{pypi}\`
-        
-        ## 🔧 How to fix:
-        
-        1. Open \`pyproject.toml\`
-        2. Update the version field to a higher version
-        3. Commit and push your changes
-        
-        ## 📋 Suggested version bumps:
-        - **Patch**: \`{current.major}.{current.minor}.{current.micro + 1}\` (bug fixes)
-        - **Minor**: \`{current.major}.{current.minor + 1}.0\` (new features)  
-        - **Major**: \`{current.major + 1}.0.0\` (breaking changes)
-        ''')
+            print(f'To fix: Bump version in pyproject.toml to something higher than {pypi}')
+            print(f'Examples:')
+            print(f'  - Patch: {current.major}.{current.minor}.{current.micro + 1} (for bug fixes)')
+            print(f'  - Minor: {current.major}.{current.minor + 1}.0 (for new features)')
+            print(f'  - Major: {current.major + 1}.0.0 (for breaking changes)')
             sys.exit(1)
-        "
+        " > vc.out 2>&1
+        code=$?
+
+        if [ $code -ne 0 ]; then
+          short="$(cat vc.out)"
+          
+          # Error annotation (appears in PR checks)
+          echo "::error title=Version check failed::Version $CURRENT_VERSION is not greater than PyPI version $PYPI_VERSION. Please bump the version in pyproject.toml"
+          
+          # Optional: point to pyproject.toml file
+          echo "::error file=pyproject.toml,line=3,title=Version needs to be bumped::Current: $CURRENT_VERSION, PyPI: $PYPI_VERSION"
+
+          # Step summary (visible box in PR Checks UI)
+          {
+            echo "### ❌ Version check failed"
+            echo ""
+            echo "**Current version:** \`$CURRENT_VERSION\`"
+            echo "**PyPI version:** \`$PYPI_VERSION\`"
+            echo ""
+            echo "**Error details:**"
+            echo '```'
+            echo "$short"
+            echo '```'
+            echo ""
+            echo "**Quick fix:** Update the \`version\` field in \`pyproject.toml\` to a higher version than \`$PYPI_VERSION\`"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          # Expose error for later steps if needed
+          {
+            echo "short_error<<'EOF'"
+            echo "$short"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+          exit $code
+        else
+          # Success case
+          {
+            echo "### ✅ Version check passed"
+            echo ""
+            echo "**Current version:** \`$CURRENT_VERSION\`"
+            echo "**PyPI version:** \`$PYPI_VERSION\`"
+            echo ""
+            echo "Version has been properly bumped and is ready for publishing after merge!"
+          } >> "$GITHUB_STEP_SUMMARY"
+        fi
 
   publish:
     name: Publish to PyPI
