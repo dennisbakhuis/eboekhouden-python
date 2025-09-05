@@ -169,7 +169,7 @@ jobs:
       name: pypi
       url: https://pypi.org/p/eboekhouden-python
     permissions:
-      id-token: write  # IMPORTANT: this permission is mandatory for trusted publishing
+      id-token: write      # For PyPI trusted publishing
     steps:
     - uses: actions/checkout@v4
     
@@ -220,21 +220,21 @@ jobs:
         print-hash: true
     
     - name: Create GitHub Release
-      uses: actions/create-release@v1
+      run: |
+        VERSION="${{ steps.version_check.outputs.current_version }}"
+        gh release create "v${VERSION}" \
+          --title "Release v${VERSION}" \
+          --notes "## Changes
+
+        Automated release of version ${VERSION}
+
+        ## Installation
+
+        \`\`\`bash
+        pip install eboekhouden-python==${VERSION}
+        \`\`\`
+
+        ## What's Changed
+        - Published to PyPI: https://pypi.org/project/eboekhouden-python/${VERSION}/"
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        tag_name: v${{ steps.version_check.outputs.current_version }}
-        release_name: Release v${{ steps.version_check.outputs.current_version }}
-        body: |
-          ## Changes
-          
-          Automated release of version ${{ steps.version_check.outputs.current_version }}
-          
-          ## Installation
-          
-          ```bash
-          pip install eboekhouden-python==${{ steps.version_check.outputs.current_version }}
-          ```
-        draft: false
-        prerelease: false
